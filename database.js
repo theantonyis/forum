@@ -1,4 +1,4 @@
-const fs = require("fs");
+const fs = require("fs"); // library fs
 const crypto = require("crypto");
 const {MongoClient, ServerApiVersion} = require("mongodb");
 const uri = "mongodb+srv://antony:robocode1234@cluster0.jkl6aib.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0";
