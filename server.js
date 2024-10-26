@@ -66,7 +66,7 @@ function getCredentionals(c = '') {
     return {user_id, login};
 }
 
-function registerUser(req, res) {
+async function registerUser(req, res) {
     let data = '';
     req.on('data', function (chunk) {
         data += chunk;
@@ -74,17 +74,24 @@ function registerUser(req, res) {
     req.on('end', async function () {
         try {
             const user = JSON.parse(data);
+            console.log(user);
+
             if (!user.login || !user.password) {
+                res.writeHead(400); // Bad Request
                 return res.end('Empty login or password');
             }
+
             if (await db.isUserExist(user.login)) {
+                res.writeHead(409); // Conflict
                 return res.end('User already exist');
             }
             await db.addUser(user);
+            res.writeHead(201); // Created
             return res.end('Registeration is successfull');
         } catch (e) {
-            res.writeHead(500);
-            return res.end('Error: ' + e);
+            console.error("Registration error:", e); // Log the error
+            res.writeHead(500); // Internal Server Error
+            return res.end('Error: ' + e.message); // Send error message back
         }
     });
 }

@@ -1,9 +1,11 @@
 const registerForm = document.getElementById('register-form');
 // const loginForm = document.getElementById('login-form');
 
-registerForm?.addEventListener('submit', (event) => {
+registerForm?.addEventListener('submit', async (event) => {
     event.preventDefault();
-    const {login, password, passwordRepeat} = registerForm;
+    const login = registerForm.elements['login'].value;
+    const password = registerForm.elements['password'].value;
+    const passwordRepeat = registerForm.elements['passwordRepeat'].value;
     if(password.value !== passwordRepeat.value) {
         return alert('Паролі не співпадають')
     }
@@ -11,10 +13,24 @@ registerForm?.addEventListener('submit', (event) => {
         login: login.value,
         password: password.value
     });
-    const xhr = new XMLHttpRequest();
-    xhr.open('POST', '/api/register');
-    xhr.send(user);
-    xhr.onload = () => alert(xhr.response);
+
+    try {
+        const response = await fetch('/api/register', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(user)
+        });
+
+        const result = await response.text(); // or response.json() if the response is JSON
+        if (!response.ok) {
+            throw new Error(result); // Handle HTTP errors
+        }
+        alert(result); // Success message
+    } catch (error) {
+        alert('Error: ' + error.message); // Display error message
+    }
 });
 
 // loginForm?.addEventListener('submit', (event) => {
