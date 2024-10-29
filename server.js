@@ -11,14 +11,15 @@ const indexHtmlFile = fs.readFileSync(path.join(__dirname, 'static', 'index.html
 const authFile = fs.readFileSync(path.join(__dirname, 'static', 'auth.js'));
 const styleFile = fs.readFileSync(path.join(__dirname, 'static', 'style.css'));
 const registerFile = fs.readFileSync(path.join(__dirname, 'static', 'register.html'));
-// const loginFile = fs.readFileSync(path.join(__dirname, 'static', 'login.html'));
+const loginFile = fs.readFileSync(path.join(__dirname, 'static', 'login.html'));
 
 const server = http.createServer((req, res) => {
     if (req.method === 'GET') {
         switch (req.url) {
             case '/register':
                 return res.end(registerFile);
-            // case '/login': return res.end(loginFile);
+            case '/login':
+                return res.end(loginFile);
             case '/auth.js':
                 return res.end(authFile);
             case '/style.css':
@@ -31,8 +32,8 @@ const server = http.createServer((req, res) => {
         switch (req.url) {
             case '/api/register':
                 return registerUser(req, res);
-            // case '/api/login':
-            //     return login(req, res);
+            case '/api/login':
+                return login(req, res);
             default:
                 return guarded(req, res);
         }
@@ -93,6 +94,26 @@ async function registerUser(req, res) {
             console.error("Registration error:", e); // Log the error
             res.writeHead(500); // Internal Server Error
             return res.end('Error: ' + e.message); // Send error message back
+        }
+    });
+}
+
+async function login(req, res) {
+    let data = '';
+    req.on('data', function(chunk) {
+        data += chunk;
+    });
+    req.on('end', async function() {
+        try {
+            const user = JSON.parse(data);
+            const token = await db.getAuthToken(user);
+            validAuthTokens.push(token);
+            res.writeHead(200);
+            res.end(token);
+        }
+        catch(e) {
+            res.writeHead(500);
+            return res.end('Error: ' + e);
         }
     });
 }

@@ -40,9 +40,23 @@ const addUser = async (user) => {
     });
 };
 
+const getAuthToken = async (user) => {
+    const candidate = await db.collection('users').findOne({ username: user.login });
+    if(!candidate) {
+        throw 'Wrong login';
+    }
+    const { _id, username, password, salt} = candidate;
+    const hash = crypto.pbkdf2Sync(user.password, salt, 1000, 64, `sha512`).toString(`hex`);
+    if(password !== hash) {
+        throw 'Wrong password';
+    }
+    return _id + '.' + username + '.' + crypto.randomBytes(20).toString('hex');
+};
+
 module.exports = {
     isUserExist,
-    addUser
+    addUser,
+    getAuthToken
 };
 
 async function run() {

@@ -1,5 +1,5 @@
 const registerForm = document.getElementById('register-form');
-// const loginForm = document.getElementById('login-form');
+const loginForm = document.getElementById('login-form');
 
 registerForm?.addEventListener('submit', async (event) => {
     event.preventDefault();
@@ -33,24 +33,34 @@ registerForm?.addEventListener('submit', async (event) => {
     }
 });
 
-// loginForm?.addEventListener('submit', (event) => {
-//     event.preventDefault();
-//     const {login, password} = loginForm;
-//     const user = JSON.stringify({
-//         login: login.value,
-//         password: password.value
-//     });
-//     const xhr = new XMLHttpRequest();
-//     xhr.open('POST', '/api/login');
-//     xhr.send(user);
-//     xhr.onload = () => {
-//         if(xhr.status === 200) {
-//             const token = xhr.response;
-//             document.cookie = `token=${token}`;
-//             window.location.assign('/');
-//         }
-//         else {
-//             return alert(xhr.response);
-//         }
-//     }
-// });
+loginForm?.addEventListener('submit', async(event) => {
+    event.preventDefault();
+    const login = loginForm.elements['login'].value;
+    const password = loginForm.elements['password'].value;
+    const user = {
+        login: login,
+        password: password
+    };
+
+
+    try {
+        const response = await fetch('/api/login', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(user)
+        });
+
+        if (!response.ok) {
+            const errorText = await response.text();
+            throw new Error(errorText);
+        }
+
+        const token = await response.text();
+        document.cookie = `token=${token}`;
+        window.location.assign('/');
+    } catch (error) {
+        alert('Error: ' + error.message);
+    }
+});
