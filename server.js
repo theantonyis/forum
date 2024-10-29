@@ -73,6 +73,7 @@ async function registerUser(req, res) {
     });
     req.on('end', async function () {
         try {
+            console.log("Received data:", data);
             const user = JSON.parse(data);
             console.log(user);
 
@@ -87,7 +88,7 @@ async function registerUser(req, res) {
             }
             await db.addUser(user);
             res.writeHead(201); // Created
-            return res.end('Registeration is successfull');
+            return res.end('Registration is successful');
         } catch (e) {
             console.error("Registration error:", e); // Log the error
             res.writeHead(500); // Internal Server Error

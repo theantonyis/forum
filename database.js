@@ -40,12 +40,12 @@ const addUser = async (user) => {
     });
 };
 
+module.exports = {
+    isUserExist,
+    addUser
+};
+
 async function run() {
     await connectToDatabase();
-
-    module.exports = {
-        isUserExist,
-        addUser
-    };
 }
 run().catch(console.dir);

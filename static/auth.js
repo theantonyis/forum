@@ -9,10 +9,10 @@ registerForm?.addEventListener('submit', async (event) => {
     if(password.value !== passwordRepeat.value) {
         return alert('Паролі не співпадають')
     }
-    const user = JSON.stringify({
-        login: login.value,
-        password: password.value
-    });
+    const user = {
+        login: login,
+        password: password
+    };
 
     try {
         const response = await fetch('/api/register', {
