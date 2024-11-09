@@ -7,7 +7,7 @@ const cookie = require('cookie');
 const validAuthTokens = [];
 
 const indexHtmlFile = fs.readFileSync(path.join(__dirname, 'static', 'index.html'));
-// const scriptFile = fs.readFileSync(path.join(__dirname, 'static', 'script.js'));
+const scriptFile = fs.readFileSync(path.join(__dirname, 'static', 'script.js'));
 const authFile = fs.readFileSync(path.join(__dirname, 'static', 'auth.js'));
 const styleFile = fs.readFileSync(path.join(__dirname, 'static', 'style.css'));
 const registerFile = fs.readFileSync(path.join(__dirname, 'static', 'register.html'));
@@ -43,15 +43,15 @@ const server = http.createServer((req, res) => {
 function guarded(req, res) {
     const credentionals = getCredentionals(req.headers?.cookie);
     if (!credentionals) {
-        res.writeHead(302, {'Location': '/register'});
+        res.writeHead(302, {'Location': '/login'});
         return res.end();
     }
     if (req.method === 'GET') {
         switch (req.url) {
             case '/':
                 return res.end(indexHtmlFile);
-            // case '/script.js':
-            //     return res.end(scriptFile);
+            case '/script.js':
+                return res.end(scriptFile);
         }
     }
     res.writeHead(404);
