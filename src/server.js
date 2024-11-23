@@ -1,17 +1,17 @@
 const http = require('http');
 const fs = require('fs');
 const path = require('path');
-const db = require('./database');
+const db = require('../public/database');
 const cookie = require('cookie');
 
 const validAuthTokens = [];
 
-const indexHtmlFile = fs.readFileSync(path.join(__dirname, 'static', 'index.html'));
+const indexFile = fs.readFileSync(path.join(__dirname, 'public', 'index.html'));
 const scriptFile = fs.readFileSync(path.join(__dirname, 'static', 'script.js'));
-const authFile = fs.readFileSync(path.join(__dirname, 'static', 'auth.js'));
-const styleFile = fs.readFileSync(path.join(__dirname, 'static', 'style.css'));
-const registerFile = fs.readFileSync(path.join(__dirname, 'static', 'register.html'));
-const loginFile = fs.readFileSync(path.join(__dirname, 'static', 'login.html'));
+const authFile = fs.readFileSync(path.join(__dirname, 'public', 'auth.js'));
+const styleFile = fs.readFileSync(path.join(__dirname, 'public', 'style.css'));
+const registerFile = fs.readFileSync(path.join(__dirname, 'public', 'register.html'));
+const loginFile = fs.readFileSync(path.join(__dirname, 'public', 'login.html'));
 
 const server = http.createServer((req, res) => {
     if (req.method === 'GET') {
@@ -49,7 +49,7 @@ function guarded(req, res) {
     if (req.method === 'GET') {
         switch (req.url) {
             case '/':
-                return res.end(indexHtmlFile);
+                return res.end(indexFile);
             case '/script.js':
                 return res.end(scriptFile);
         }
