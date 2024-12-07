@@ -1,14 +1,20 @@
 import React from 'react';
 
 // If you are using React Router
-import { useLocation } from 'react-router-dom';
+import { useNavigate  } from 'react-router-dom';
 
 const Header = () => {
-    const location = useLocation();  // Use React Router's location
+
+    const navigate = useNavigate(); // useNavigate hook to programmatically navigate
 
     const handleLogout = () => {
+        // Clear the token cookie
         document.cookie = 'token=; Max-Age=0';
-        location.assign('/login');
+
+        // Redirect to the login page using navigate()
+        navigate('/login');
+
+        // Log a message for debugging purposes
         console.log("Logged out");
     };
 
@@ -19,6 +25,5 @@ const Header = () => {
         </header>
     );
 };
-
 
 export default Header;

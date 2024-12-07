@@ -1,123 +1,102 @@
-const http = require('http');
+const express = require('express');
 const fs = require('fs');
 const path = require('path');
-const db = require('../public/database');
-const cookie = require('cookie');
+const cookieParser = require('cookie-parser');
+const db = require('./database'); // Assuming database logic is stored here
+const crypto = require('crypto');
 
-const validAuthTokens = [];
+// Initialize Express
+const app = express();
+const port = 5000;
 
+app.use(express.json());
+app.use(cookieParser()); // Parse cookies from incoming requests
+app.use(express.static(path.join(__dirname, "..", 'public'))); // Serve static files from the public folder
+
+// Static files (CSS, JS, etc.)
 const indexFile = fs.readFileSync(path.join(__dirname, "..", 'public', 'index.html'));
-const scriptFile = fs.readFileSync(path.join(__dirname, "..", 'static', 'script.js'));
-const authFile = fs.readFileSync(path.join(__dirname, "..", 'public', 'auth.js'));
-const styleFile = fs.readFileSync(path.join(__dirname, "..", 'static', 'style.css'));
 const registerFile = fs.readFileSync(path.join(__dirname, "..", 'public', 'register.html'));
 const loginFile = fs.readFileSync(path.join(__dirname, "..", 'public', 'login.html'));
 
+// In-memory valid tokens (this should be stored securely in a real-world app)
+const validAuthTokens = [];
 
+// Routes for serving HTML pages
+app.get('/register', (req, res) => {
+    res.send(registerFile);
+});
 
-const server = http.createServer((req, res) => {
-    if (req.method === 'GET') {
-        switch (req.url) {
-            case '/register':
-                return res.end(registerFile);
-            case '/login':
-                return res.end(loginFile);
-            case '/auth.js':
-                return res.end(authFile);
-            case '/style.css':
-                return res.end(styleFile);
-            default:
-                return guarded(req, res);
-        }
+app.get('/login', (req, res) => {
+    res.send(loginFile);
+});
+
+// Protected Route (Requires Valid Token)
+app.get('/', (req, res) => {
+    const credentials = getCredentials(req.cookies.token);
+    if (!credentials) {
+        return res.redirect('/login');
     }
-    if (req.method === 'POST') {
-        switch (req.url) {
-            case '/api/register':
-                return registerUser(req, res);
-            case '/api/login':
-                return login(req, res);
-            default:
-                return guarded(req, res);
+    res.send(indexFile); // Render the main page if the user is authenticated
+});
+
+// Registration Endpoint
+app.post('/api/register', async (req, res) => {
+    try {
+        const { login, password } = req.body;
+
+        if (!login || !password) {
+            return res.status(400).send('Empty login or password');
         }
+
+        const existingUser = await db.isUserExist(login);
+        if (existingUser) {
+            return res.status(409).send('User already exists');
+        }
+
+        await db.addUser({ login, password }); // Assuming addUser adds the user to the database
+        res.status(201).send('Registration successful');
+    } catch (err) {
+        console.error(err);
+        res.status(500).send('Server Error: ' + err.message);
     }
 });
 
-function guarded(req, res) {
-    const credentionals = getCredentionals(req.headers?.cookie);
-    if (!credentionals) {
-        res.writeHead(302, {'Location': '/login'});
-        return res.end();
-    }
-    if (req.method === 'GET') {
-        switch (req.url) {
-            case '/':
-                return res.end(indexFile);
-            case '/script.js':
-                return res.end(scriptFile);
+// Login Endpoint
+app.post('/api/login', async (req, res) => {
+    try {
+        const { login, password } = req.body;
+
+        const user = await db.getUserByLogin(login); // Get user by login
+        if (!user || user.password !== password) {
+            return res.status(401).send('Invalid credentials');
         }
+
+        // Generate auth token (for simplicity, using a random value here)
+        const token = generateAuthToken(user.id, login);
+        validAuthTokens.push(token);
+
+        // Set token in cookie
+        res.cookie('token', token, { httpOnly: true });
+        res.status(200).send(token);
+    } catch (err) {
+        console.error(err);
+        res.status(500).send('Server Error: ' + err.message);
     }
-    res.writeHead(404);
-    return res.end('Error 404');
+});
+
+// Utility Functions
+function generateAuthToken(userId, login) {
+    const token = `${userId}.${login}.${crypto.randomBytes(16).toString('hex')}`;
+    return token;
 }
 
-function getCredentionals(c = '') {
-    const cookies = cookie.parse(c);
-    const token = cookies?.token;
+function getCredentials(token) {
     if (!token || !validAuthTokens.includes(token)) return null;
-    const [user_id, login] = token.split('.');
-    if (!user_id || !login) return null;
-    return {user_id, login};
+    const [userId, login] = token.split('.');
+    return { userId, login };
 }
 
-async function registerUser(req, res) {
-    let data = '';
-    req.on('data', function (chunk) {
-        data += chunk;
-    });
-    req.on('end', async function () {
-        try {
-            console.log("Received data:", data);
-            const user = JSON.parse(data);
-            console.log(user);
-
-            if (!user.login || !user.password) {
-                res.writeHead(400); // Bad Request
-                return res.end('Empty login or password');
-            }
-
-            if (await db.isUserExist(user.login)) {
-                res.writeHead(409); // Conflict
-                return res.end('User already exist');
-            }
-            await db.addUser(user);
-            res.writeHead(201); // Created
-            return res.end('Registration is successful');
-        } catch (e) {
-            console.error("Registration error:", e); // Log the error
-            res.writeHead(500); // Internal Server Error
-            return res.end('Error: ' + e.message); // Send error message back
-        }
-    });
-}
-
-async function login(req, res) {
-    let data = '';
-    req.on('data', function(chunk) {
-        data += chunk;
-    });
-    req.on('end', async function() {
-        try {
-            const user = JSON.parse(data);
-            const token = await db.getAuthToken(user);
-            validAuthTokens.push(token);
-            res.writeHead(200);
-            res.end(token);
-        }
-        catch(e) {
-            res.writeHead(500);
-            return res.end('Error: ' + e);
-        }
-    });
-}
-
-server.listen(3000);
+// Start the server
+app.listen(port, () => {
+    console.log(`Server is running on http://localhost:${port}`);
+});
