@@ -1,6 +1,11 @@
 import React from 'react';
 
+// If you are using React Router
+import { useLocation } from 'react-router-dom';
+
 const Header = () => {
+    const location = useLocation();  // Use React Router's location
+
     const handleLogout = () => {
         document.cookie = 'token=; Max-Age=0';
         location.assign('/login');
@@ -14,5 +19,6 @@ const Header = () => {
         </header>
     );
 };
+
 
 export default Header;

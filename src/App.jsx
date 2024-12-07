@@ -1,25 +1,19 @@
-import React, { useState } from 'react';
+import React from 'react';
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import RegisterForm from './components/RegisterForm'; // Import the RegisterForm component
+import LoginForm from './components/LoginForm'; // Import the LoginForm component
 import Header from './components/Header';
-import DiscussionForm from './components/DiscussionForm';
-import DiscussionsList from './components/DiscussionsList';
 
-const App = () => {
-    const [discussions, setDiscussions] = useState([]);
-
-    const createDiscussion = (newDiscussion) => {
-        setDiscussions([...discussions, newDiscussion]);
-    };
-
+function App() {
     return (
-        <main>
+        <Router>
             <Header />
-            <h2>Список обговорень</h2>
-            <DiscussionsList discussions={discussions} />
-
-            <h2>Створити нове обговорення</h2>
-            <DiscussionForm createDiscussion={createDiscussion} />
-        </main>
+            <Routes>
+                <Route path="/register" element={<RegisterForm />} />
+                <Route path="/login" element={<LoginForm />} />
+            </Routes>
+        </Router>
     );
-};
+}
 
 export default App;

@@ -6,12 +6,14 @@ const cookie = require('cookie');
 
 const validAuthTokens = [];
 
-const indexFile = fs.readFileSync(path.join(__dirname, 'public', 'index.html'));
-const scriptFile = fs.readFileSync(path.join(__dirname, 'static', 'script.js'));
-const authFile = fs.readFileSync(path.join(__dirname, 'public', 'auth.js'));
-const styleFile = fs.readFileSync(path.join(__dirname, 'public', 'style.css'));
-const registerFile = fs.readFileSync(path.join(__dirname, 'public', 'register.html'));
-const loginFile = fs.readFileSync(path.join(__dirname, 'public', 'login.html'));
+const indexFile = fs.readFileSync(path.join(__dirname, "..", 'public', 'index.html'));
+const scriptFile = fs.readFileSync(path.join(__dirname, "..", 'static', 'script.js'));
+const authFile = fs.readFileSync(path.join(__dirname, "..", 'public', 'auth.js'));
+const styleFile = fs.readFileSync(path.join(__dirname, "..", 'static', 'style.css'));
+const registerFile = fs.readFileSync(path.join(__dirname, "..", 'public', 'register.html'));
+const loginFile = fs.readFileSync(path.join(__dirname, "..", 'public', 'login.html'));
+
+
 
 const server = http.createServer((req, res) => {
     if (req.method === 'GET') {
