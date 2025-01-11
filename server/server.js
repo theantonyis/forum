@@ -4,17 +4,19 @@ const path = require('path');
 const cookieParser = require('cookie-parser');
 const db = require('./database'); // Assuming database logic is stored here
 const crypto = require('crypto');
+const cors = require('cors');
 
 // Initialize Express
 const app = express();
 const port = 5000;
 
 app.use(express.json());
+app.use(cors());
 app.use(cookieParser()); // Parse cookies from incoming requests
 app.use(express.static(path.join(__dirname, "..", 'public'))); // Serve static files from the public folder
 
 // Static files (CSS, JS, etc.)
-const indexFile = fs.readFileSync(path.join(__dirname, "..", 'public', 'index.html'));
+const indexFile = fs.readFileSync(path.join(__dirname, "..", 'index.html'));
 const registerFile = fs.readFileSync(path.join(__dirname, "..", 'public', 'register.html'));
 const loginFile = fs.readFileSync(path.join(__dirname, "..", 'public', 'login.html'));
 
@@ -30,7 +32,7 @@ app.get('/login', (req, res) => {
     res.send(loginFile);
 });
 
-// Protected Route (Requires Valid Token)
+//Protected Route (Requires Valid Token)
 app.get('/', (req, res) => {
     const credentials = getCredentials(req.cookies.token);
     if (!credentials) {
