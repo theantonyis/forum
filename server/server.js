@@ -10,27 +10,32 @@ const cors = require('cors');
 const app = express();
 const port = 5000;
 
+const corsOptions = {
+    origin: 'http://localhost:3000', // Your frontend URL
+    credentials: true,  // Allow cookies to be sent with requests
+};
+
 app.use(express.json());
-app.use(cors());
+app.use(cors(corsOptions));
 app.use(cookieParser()); // Parse cookies from incoming requests
 app.use(express.static(path.join(__dirname, "..", 'public'))); // Serve static files from the public folder
 
 // Static files (CSS, JS, etc.)
 const indexFile = fs.readFileSync(path.join(__dirname, "..", 'index.html'));
-const registerFile = fs.readFileSync(path.join(__dirname, "..", 'public', 'register.html'));
-const loginFile = fs.readFileSync(path.join(__dirname, "..", 'public', 'login.html'));
+// const registerFile = fs.readFileSync(path.join(__dirname, "..", 'public', 'register.html'));
+// const loginFile = fs.readFileSync(path.join(__dirname, "..", 'public', 'login.html'));
 
 // In-memory valid tokens (this should be stored securely in a real-world app)
 const validAuthTokens = [];
 
 // Routes for serving HTML pages
-app.get('/register', (req, res) => {
-    res.send(registerFile);
-});
-
-app.get('/login', (req, res) => {
-    res.send(loginFile);
-});
+// app.get('/register', (req, res) => {
+//     res.send(registerFile);
+// });
+//
+// app.get('/login', (req, res) => {
+//     res.send(loginFile);
+// });
 
 //Protected Route (Requires Valid Token)
 app.get('/', (req, res) => {

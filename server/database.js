@@ -1,4 +1,3 @@
-const bcrypt = require("bcrypt");
 const { MongoClient, ServerApiVersion } = require("mongodb");
 const crypto = require("crypto");
 
@@ -42,15 +41,23 @@ const isUserExist = async (login) => {
     return user !== null;
 };
 
+// Helper function to hash the password using pbkdf2
+const hashPassword = (password, salt) => {
+    return crypto.pbkdf2Sync(password, salt, 1000, 64, 'sha512').toString('hex');
+};
+
 // Add a user to the database (with hashed password)
 const addUser = async (user) => {
-    const saltRounds = 10; // Number of salt rounds for bcrypt
-    const passwordHash = await bcrypt.hash(user.password, saltRounds);
+    // Generate a salt
+    const salt = crypto.randomBytes(16).toString('hex');
+    // Hash the password
+    const passwordHash = hashPassword(user.password, salt);
 
     try {
         await db.collection('users').insertOne({
             username: user.login,
             password: passwordHash,
+            salt: salt,
         });
         console.log(`User ${user.login} added successfully.`);
     } catch (error) {
@@ -67,9 +74,11 @@ const getAuthToken = async (user) => {
             throw 'Wrong login';
         }
 
-        // Compare the entered password with the stored hashed password
-        const isPasswordValid = await bcrypt.compare(user.password, candidate.password);
-        if (!isPasswordValid) {
+        // Hash the entered password using the stored salt
+        const hashedPassword = hashPassword(user.password, candidate.salt);
+
+        // Compare the hashed password with the stored one
+        if (candidate.password !== hashedPassword) {
             throw 'Wrong password';
         }
 

@@ -1,7 +1,5 @@
-import React, { useState} from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-
-import axios from 'axios';
 
 const LoginForm = () => {
     const [login, setLogin] = useState('');
@@ -13,43 +11,61 @@ const LoginForm = () => {
         e.preventDefault();
 
         try {
-            const response = await axios.post('/api/login', { login, password });
+            const response = await fetch('/api/login', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ login, password }),
+                credentials: 'include', // Make sure cookies are included
+            });
 
-            if (response.status === 200) {
-                navigate('/'); // Redirect after successful login
+            if (response.ok) {
+                window.location.href = '/'; // Redirect after successful login
+            } else {
+                const error = await response.text();
+                setErrorMessage(error);
             }
         } catch (error) {
-            if (error.response) {
-                // Server responded with a status code outside 2xx range
-                setErrorMessage(error.response.data || 'Login failed');
-            } else if (error.request) {
-                // No response received from the server
-                setErrorMessage('No response from server');
-            } else {
-                // Error setting up the request
-                setErrorMessage('Error: ' + error.message);
-            }
+            setErrorMessage('Error: ' + error.message);
         }
     };
 
     return (
-        <form onSubmit={handleSubmit}>
-            <h2>Login</h2>
-            {errorMessage && <p>{errorMessage}</p>}
-            <input
-                type="text"
-                value={login}
-                onChange={(e) => setLogin(e.target.value)}
-                placeholder="Username"
-            />
-            <input
-                type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                placeholder="Password"
-            />
-            <button type="submit">Login</button>
-        </form>
+        <main>
+            <header className="header">
+                <h1>Forum</h1>
+                <a className="link" href="/register">Register</a>
+            </header>
+            <form className="register-form" onSubmit={handleSubmit} id="login-form">
+                <div className="register-form__container">
+                    <h1 className="register-form__title">Login page</h1>
+                    {errorMessage && <p>{errorMessage}</p>}
+
+                    <label htmlFor="login" className="register-form__label">Login</label>
+                    <input
+                        type="text"
+                        id="login"
+                        name="login"
+                        className="register-form__input"
+                        value={login}
+                        onChange={(e) => setLogin(e.target.value)}
+                        placeholder="Username"
+                    />
+
+                    <label htmlFor="password" className="register-form__label">Password</label>
+                    <input
+                        type="password"
+                        id="password"
+                        name="password"
+                        className="register-form__input"
+                        value={password}
+                        onChange={(e) => setPassword(e.target.value)}
+                        placeholder="Password"
+                    />
+
+                    <button type="submit" className="register-form__button">Submit</button>
+                </div>
+            </form>
+        </main>
     );
 };
 
