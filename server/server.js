@@ -110,6 +110,36 @@ function getCredentials(token) {
     return { userId, login };
 }
 
+app.post('/api/addMessage', async (req, res) => {
+    try {
+        const { content, author } = req.body;
+
+        if (!content || !author) {
+            return res.status(400).send('Content or author is missing');
+        }
+
+        // Call addMessage to insert the message into the database
+        await db.addMessage({ content, author });
+
+        res.status(201).send('Message added successfully');
+    } catch (err) {
+        console.error(err);
+        res.status(500).send('Server Error: ' + err.message);
+    }
+});
+
+// Route to get all messages
+app.get('/api/messages', async (req, res) => {
+    try {
+        const messages = await db.getMessages(); // Using the getMessages function
+        res.status(200).json(messages);
+    } catch (error) {
+        console.error('Error fetching messages:', error);
+        res.status(500).json({ message: 'Failed to fetch messages' });
+    }
+});
+
+
 // Start the server
 app.listen(port, () => {
     console.log(`Server is running on http://localhost:${port}`);
