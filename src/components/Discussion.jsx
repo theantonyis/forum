@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import '../styles/discussion.css';
 
 const Discussion = () => {
   const [messages, setMessages] = useState([]);
