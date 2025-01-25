@@ -74,8 +74,15 @@ app.post('/api/login', async (req, res) => {
         const { login, password } = req.body;
 
         const user = await db.getUserByLogin(login); // Get user by login
-        if (!user || user.password !== password) {
-            return res.status(401).send('Invalid credentials');
+        if (!user) {
+            return res.status(401).send('Invalid username');
+        }
+
+        // Verify the password by comparing the stored hash with the input password hash
+        const isPasswordValid = await db.verifyPassword(password, user.password, user.salt);
+
+        if (!isPasswordValid) {
+            return res.status(401).send('Invalid password');
         }
 
         // Generate auth token (for simplicity, using a random value here)

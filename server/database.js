@@ -43,17 +43,36 @@ const isUserExist = async (login) => {
 
 // Helper function to hash the password using pbkdf2
 const hashPassword = (password, salt) => {
-    return crypto.pbkdf2Sync(password, salt, 1000, 64, 'sha512').toString('hex');
+    return new Promise((resolve, reject) => {
+        // PBKDF2 is a key derivation function used for hashing the password
+        crypto.pbkdf2(password, salt, 1000, 64, 'sha512', (err, derivedKey) => {
+            if (err) reject(err);
+            resolve(derivedKey.toString('hex')); // Return the hashed password in hexadecimal format
+        });
+    });
+};
+
+const verifyPassword = (enteredPassword, storedHash, salt) => {
+    return new Promise((resolve, reject) => {
+        // Hash the entered password with the stored salt
+        crypto.pbkdf2(enteredPassword, salt, 1000, 64, 'sha512', (err, derivedKey) => {
+            if (err) return reject(err);
+
+            // Compare the hashed password
+            resolve(storedHash === derivedKey.toString('hex'));
+        });
+    });
 };
 
 // Add a user to the database (with hashed password)
 const addUser = async (user) => {
     // Generate a salt
     const salt = crypto.randomBytes(16).toString('hex');
-    // Hash the password
-    const passwordHash = hashPassword(user.password, salt);
 
     try {
+        // Hash the password
+        const passwordHash = await hashPassword(user.password, salt);
+
         await db.collection('users').insertOne({
             username: user.login,
             password: passwordHash,
@@ -101,7 +120,8 @@ module.exports = {
     getUserByLogin,
     isUserExist,
     addUser,
-    getAuthToken
+    getAuthToken,
+    verifyPassword
 };
 
 // Initialize connection to the database
