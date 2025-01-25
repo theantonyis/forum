@@ -85,6 +85,30 @@ const addUser = async (user) => {
     }
 };
 
+const addMessage = async (message) => {
+    try {
+        await db.collection('discussions').insertOne({
+            content: message.content,
+            author: message.author,
+            timestamp: new Date(),
+        });
+        console.log(`Message from ${message.author} added successfully.`);
+    } catch (error) {
+        console.error("Error adding message:", error);
+        throw error; // Rethrow the error to be handled by the route
+    }
+};
+
+const getMessages = async () => {
+    try {
+        return await db.collection('discussions').find().toArray();
+    } catch (error) {
+        console.error('Error fetching messages:', error);
+        throw error; // Throw the error so it can be handled by the route
+    }
+};
+
+
 // Validate user login and return a token if successful
 const getAuthToken = async (user) => {
     try {
@@ -121,7 +145,9 @@ module.exports = {
     isUserExist,
     addUser,
     getAuthToken,
-    verifyPassword
+    verifyPassword,
+    getMessages,
+    addMessage
 };
 
 // Initialize connection to the database
