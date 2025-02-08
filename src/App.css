@@ -1,10 +1,13 @@
-/* Basic CSS */
+/* Основні стилі */
 body {
     font-family: Arial, sans-serif;
     margin: 0;
     padding: 0;
+    background-color: #1E1E1E; /* Темний фон */
+    color: #f1f1f1; /* Світлий текст */
 }
 
+/* Основний контейнер */
 .main {
     display: flex;
     justify-content: center;
@@ -12,50 +15,105 @@ body {
     height: 100vh;
 }
 
+/* Заголовок */
 .header {
     text-align: center;
     margin-bottom: 20px;
+    color: #FFA500; /* Оранжевий колір заголовка */
 }
 
+/* Форма реєстрації */
 .register-form {
-    width: 300px;
+    width: 350px;
     margin: 0 auto;
-}
-
-.register-form__container {
+    background-color: #2C2C2C; /* Темний фон для форми */
+    border-radius: 8px; /* Округлі кути */
     padding: 20px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3); /* Тінь */
 }
 
+/* Заголовок форми */
 .register-form__title {
     text-align: center;
     margin-bottom: 20px;
+    font-size: 24px;
+    color: #FFA500; /* Оранжевий колір заголовка */
 }
 
+/* Лейбли для полів */
 .register-form__label {
     display: block;
     margin-bottom: 8px;
+    color: #FFA500; /* Оранжевий колір тексту */
 }
 
+/* Поля вводу */
 .register-form__input {
     width: 100%;
-    padding: 8px;
+    padding: 12px;
     margin-bottom: 16px;
+    border: 1px solid #555;
+    border-radius: 5px;
+    background-color: #333; /* Темний фон для полів */
+    color: #fff; /* Білий текст */
 }
 
+.register-form__input:focus {
+    border-color: #FFA500; /* Оранжева обводка при фокусі */
+    outline: none;
+}
+
+/* Кнопка */
 .register-form__button {
     width: 100%;
-    padding: 10px;
-    background-color: #4CAF50;
+    padding: 12px;
+    background-color: #FFA500; /* Оранжевий колір кнопки */
     color: white;
     border: none;
     cursor: pointer;
+    border-radius: 5px;
+    font-size: 16px;
+    font-weight: bold;
 }
 
 .register-form__button:hover {
-    background-color: #45a049;
+    background-color: #e68a00; /* Темніший відтінок оранжевого при ховері */
 }
 
+/* Посилання */
 .link {
     text-decoration: none;
-    color: #000;
+    color: #FFA500; /* Оранжеве посилання */
+}
+
+.link:hover {
+    color: #e68a00; /* Темніший відтінок при ховері */
+}
+
+/* Кнопка "Реєстрація" в іншій частині екрану */
+.register-form__button-container {
+    position: absolute;
+    bottom: 20px;
+    width: 100%;
+    text-align: center;
+}
+
+.register-form__button-container .register-form__button {
+    width: auto;
+    margin: 0 auto;
+}
+
+/* Додаткові стилі */
+@media (max-width: 768px) {
+    .register-form {
+        width: 80%;
+    }
+
+    .register-form__input {
+        font-size: 14px;
+    }
+
+    .register-form__button {
+        font-size: 14px;
+    }
 }
