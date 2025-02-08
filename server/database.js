@@ -85,26 +85,73 @@ const addUser = async (user) => {
     }
 };
 
-const addMessage = async (message) => {
+// const addMessage = async (message) => {
+//     try {
+//         await db.collection('discussions').insertOne({
+//             content: message.content,
+//             author: message.author,
+//             timestamp: new Date(),
+//         });
+//         console.log(`Message from ${message.author} added successfully.`);
+//     } catch (error) {
+//         console.error("Error adding message:", error);
+//         throw error; // Rethrow the error to be handled by the route
+//     }
+// };
+
+// const getMessages = async () => {
+//     try {
+//         return await db.collection('discussions').find().toArray();
+//     } catch (error) {
+//         console.error('Error fetching messages:', error);
+//         throw error; // Throw the error so it can be handled by the route
+//     }
+// };
+
+const addDiss = async (message, userId) => {
     try {
         await db.collection('discussions').insertOne({
             content: message.content,
-            author: message.author,
+            author: userId,
             timestamp: new Date(),
         });
-        console.log(`Message from ${message.author} added successfully.`);
+        console.log(`Message from ${userId} added successfully.`);
     } catch (error) {
         console.error("Error adding message:", error);
         throw error; // Rethrow the error to be handled by the route
     }
 };
 
-const getMessages = async () => {
+const getDiss = async (userId) => {
     try {
-        return await db.collection('discussions').find().toArray();
+        return await db.collection('discussions').aggregate([
+            {
+                $match: {
+                    author: userId, // Filter discussions where the author matches the logged-in user’s ID
+                }
+            },
+            {
+                $lookup: {
+                    from: 'users',
+                    localField: 'author', // The field in 'discussions' collection
+                    foreignField: '_id', // The field in 'users' collection
+                    as: 'authorDetails'  // This will store the joined data from 'users'
+                }
+            },
+            {
+                $unwind: '$authorDetails'  // Unwind the array to get a single object
+            },
+            {
+                $project: {
+                    content: 1,
+                    timestamp: 1,
+                    'authorDetails.username': 1, // Include the username field from 'users' collection
+                }
+            }
+        ]).toArray();
     } catch (error) {
         console.error('Error fetching messages:', error);
-        throw error; // Throw the error so it can be handled by the route
+        throw error;
     }
 };
 
@@ -140,14 +187,45 @@ const generateAuthToken = (userId, username) => {
     return token;
 };
 
+const authToken = async (req, res, next) => {
+    const token = req.headers['authorization']?.split(' ')[1]; // Extract the token from the Authorization header
+
+    if (!token) {
+        return res.status(403).json({ error: 'Token is required' });
+    }
+
+    try {
+        // Split the token into userId, username, and randomHexString
+        const [userId, username] = token.split('.'); // Assumes token format: "userId.username.randomHexString"
+
+        // Verify the userId and username are valid by checking against your database
+        const user = await getUserByLogin(username);  // You can check if the user exists based on the username
+
+        if (!user || user._id.toString() !== userId) {
+            return res.status(403).json({ error: 'Invalid token' });
+        }
+
+        // Attach user info to the request object for further use in other routes
+        req.user = { userId, username };
+        next(); // Call the next middleware or route handler
+    } catch (error) {
+        console.error('Error verifying token:', error);
+        res.status(403).json({ error: 'Invalid token' });
+    }
+};
+
 module.exports = {
     getUserByLogin,
     isUserExist,
     addUser,
     getAuthToken,
+    generateAuthToken,
     verifyPassword,
     getMessages,
-    addMessage
+    addMessage,
+    addDiss,
+    getDiss,
+    authToken
 };
 
 // Initialize connection to the database
