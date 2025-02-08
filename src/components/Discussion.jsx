@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import "../styles/discussion.css"
 
+<<<<<<< HEAD
 const Discussion = (discussions) => {
     const [title, setTitle] = useState('');
     const [content, setContent] = useState('');
@@ -11,6 +12,12 @@ const Discussion = (discussions) => {
         setTitle('');
         setContent('');
     };
+=======
+const Discussion = () => {
+    const [messages, setMessages] = useState([]);
+    const [newMessage, setNewMessage] = useState('');
+    const [author, setAuthor] = useState(''); // You can set a static username or get it dynamically
+>>>>>>> 568d8ebb4142ed295f1f85bae4333b93c6b30e4b
 
     return (
         <div className="discussion">

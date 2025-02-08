@@ -5,6 +5,7 @@ const cookieParser = require('cookie-parser');
 const db = require('./database'); // Assuming database logic is stored here
 const crypto = require('crypto');
 const cors = require('cors');
+const {getDiss} = require("./database");
 
 // Initialize Express
 const app = express();
@@ -86,7 +87,7 @@ app.post('/api/login', async (req, res) => {
         }
 
         // Generate auth token (for simplicity, using a random value here)
-        const token = generateAuthToken(user.id, login);
+        const token = db.generateAuthToken(user.id, login);
         validAuthTokens.push(token);
 
         // Set token in cookie
@@ -98,17 +99,39 @@ app.post('/api/login', async (req, res) => {
     }
 });
 
-// Utility Functions
-function generateAuthToken(userId, login) {
-    const token = `${userId}.${login}.${crypto.randomBytes(16).toString('hex')}`;
-    return token;
-}
-
 function getCredentials(token) {
     if (!token || !validAuthTokens.includes(token)) return null;
     const [userId, login] = token.split('.');
     return { userId, login };
 }
+
+app.get('api/discussions', async (req, res) => {
+    try {
+        const discussions = await db.getDiss();
+        res.status(200).json(discussions);  // Return the discussions as the response
+    } catch (error) {
+        res.status(500).json({ error: 'Failed to fetch discussions' });
+    }
+});
+
+app.post('/api/addDiss', async (req, res) => {
+    const { content, login, password } = req.body;
+
+    try {
+        // Authenticate the user
+        const user = await db.getUserByLogin(login);
+        if (!user) {
+            return res.status(401).json({ error: 'Invalid login' });
+        }
+
+        // Add the new message/discussion, including the user's ID as the author
+        await db.addDiss({ content }, user._id); // Pass the user's _id as the author
+        res.status(200).json({ message: 'Discussion created successfully!' });
+    } catch (error) {
+        console.error("Error creating discussion:", error);
+        res.status(500).json({ error: 'Failed to create discussion' });
+    }
+});
 
 app.post('/api/addMessage', async (req, res) => {
     try {
