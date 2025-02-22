@@ -110,15 +110,19 @@ const addUser = async (user) => {
 
 const addDiss = async (message, userId) => {
     try {
-        await db.collection('discussions').insertOne({
+        // Insert the discussion into the database
+        const result = await db.collection('discussions').insertOne({
             content: message.content,
-            author: userId,
+            title: message.title, // Ensure the title is included
+            author: userId, // Use the user's _id as the author of the discussion
             timestamp: new Date(),
         });
-        console.log(`Message from ${userId} added successfully.`);
+
+        // Fetch the inserted discussion from the database (including _id)
+        return await db.collection('discussions').findOne({_id: result.insertedId}); // Return the newly created discussion
     } catch (error) {
-        console.error("Error adding message:", error);
-        throw error; // Rethrow the error to be handled by the route
+        console.error("Error adding discussion:", error);
+        throw error;
     }
 };
 

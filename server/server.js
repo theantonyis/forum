@@ -3,9 +3,8 @@ const fs = require('fs');
 const path = require('path');
 const cookieParser = require('cookie-parser');
 const db = require('./database'); // Assuming database logic is stored here
-const crypto = require('crypto');
 const cors = require('cors');
-const {getDiss} = require("./database");
+const { authToken } = require("../src/middleware/auth");
 
 // Initialize Express
 const app = express();
@@ -114,18 +113,17 @@ app.get('api/discussions', async (req, res) => {
     }
 });
 
-app.post('/api/addDiss', async (req, res) => {
-    const { content, login, password } = req.body;
+app.post('/api/addDiss', authToken,async (req, res) => {
+    const { content, title } = req.body;
+    const { username } = req.user;
+
+    if (!username) {
+        return res.status(401).json({ error: 'You must be logged in to create a discussion' });
+    }
 
     try {
-        // Authenticate the user
-        const user = await db.getUserByLogin(login);
-        if (!user) {
-            return res.status(401).json({ error: 'Invalid login' });
-        }
-
         // Add the new message/discussion, including the user's ID as the author
-        await db.addDiss({ content }, user._id); // Pass the user's _id as the author
+        const newDiscussion = await db.addDiss({ content, title }, username);
         res.status(200).json({ message: 'Discussion created successfully!' });
     } catch (error) {
         console.error("Error creating discussion:", error);

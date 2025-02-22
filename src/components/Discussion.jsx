@@ -5,23 +5,47 @@ const Discussion = () => {
     // Стан для заголовка та контенту форми
     const [title, setTitle] = useState('');
     const [content, setContent] = useState('');
-
-    // Стан для списку обговорень
     const [discussions, setDiscussions] = useState([]);
+    const [username, setUsername] = useState(''); // You can get this from session/context or props
+
 
     // Функція для обробки форми і додавання нового обговорення
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
 
-        // Додаємо нове обговорення в список
-        setDiscussions([
-            ...discussions,
-            { title, content }
-        ]);
+        const token = localStorage.getItem('authToken');
 
-        // Очищаємо форму після відправки
-        setTitle('');
-        setContent('');
+        if (!token) {
+            alert('You must be logged in to create a discussion');
+            return;
+        }
+
+        const newDiscussion = { content, title, username };
+
+        try {
+            // Make the POST request to the /api/addDiss route
+            const response = await fetch('/api/addDiss', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(newDiscussion),
+            });
+
+            if (response.ok) {
+                // If the request is successful, update the list of discussions
+                const createdDiscussion = await response.json();
+                setDiscussions([...discussions, createdDiscussion]);
+            } else {
+                console.error('Failed to add discussion');
+            }
+
+            // Clear the form after submission
+            setTitle('');
+            setContent('');
+        } catch (error) {
+            console.error('Error submitting discussion:', error);
+        }
     };
 
     return (

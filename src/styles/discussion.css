@@ -1,5 +1,10 @@
 /* Основний контейнер для обговорення */
 .discussion {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  text-align: center;
+  position: relative;
   width: 100%;
   max-width: 800px;
   margin: 0 auto;
@@ -9,7 +14,6 @@
   box-shadow: 0 4px 25px rgba(0, 0, 0, 0.3);
   font-family: 'Arial', sans-serif;
   color: #fff;
-  position: relative;
   overflow: hidden;
   border: 1px solid #333;
 }
