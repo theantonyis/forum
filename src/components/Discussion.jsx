@@ -28,8 +28,9 @@ const Discussion = () => {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`,
                 },
-                body: JSON.stringify(newDiscussion),
+                body: JSON.stringify({ content: 'New discussion', title: 'Discussion Title' }),
             });
 
             if (response.ok) {

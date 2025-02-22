@@ -4,7 +4,7 @@ const path = require('path');
 const cookieParser = require('cookie-parser');
 const db = require('./database'); // Assuming database logic is stored here
 const cors = require('cors');
-const { authToken } = require("../src/middleware/auth");
+const au = require("../src/middleware/auth");
 
 // Initialize Express
 const app = express();
@@ -86,12 +86,10 @@ app.post('/api/login', async (req, res) => {
         }
 
         // Generate auth token (for simplicity, using a random value here)
-        const token = db.generateAuthToken(user.id, login);
-        validAuthTokens.push(token);
+        const token = au.generateAuthToken(user.id, login);
 
         // Set token in cookie
-        res.cookie('token', token, { httpOnly: true });
-        res.status(200).send(token);
+        res.status(200).json({ token });  // Sending token in response body
     } catch (err) {
         console.error(err);
         res.status(500).send('Server Error: ' + err.message);
@@ -113,9 +111,9 @@ app.get('api/discussions', async (req, res) => {
     }
 });
 
-app.post('/api/addDiss', authToken,async (req, res) => {
+app.post('/api/addDiss', au.authToken,async (req, res) => {
     const { content, title } = req.body;
-    const { username } = req.user;
+    const { username, userId } = req.user;
 
     if (!username) {
         return res.status(401).json({ error: 'You must be logged in to create a discussion' });
@@ -123,7 +121,7 @@ app.post('/api/addDiss', authToken,async (req, res) => {
 
     try {
         // Add the new message/discussion, including the user's ID as the author
-        const newDiscussion = await db.addDiss({ content, title }, username);
+        const newDiscussion = await db.addDiss({ content, title }, userId);
         res.status(200).json({ message: 'Discussion created successfully!' });
     } catch (error) {
         console.error("Error creating discussion:", error);
