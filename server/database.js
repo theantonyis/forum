@@ -221,8 +221,8 @@ module.exports = {
     getAuthToken,
     generateAuthToken,
     verifyPassword,
-    getMessages,
-    addMessage,
+    // getMessages,
+    // addMessage,
     addDiss,
     getDiss,
     authToken
