@@ -82,6 +82,11 @@ app.post('/api/login', async (req, res) => {
     }
 });
 
+app.post('/api/logout', (req, res) => {
+    res.clearCookie('token'); // Clear the token cookie
+    res.status(200).send('Logged out');
+});
+
 app.get('api/discussions', async (req, res) => {
     try {
         const discussions = await db.getDiss();

@@ -1,18 +1,16 @@
-import React from 'react';
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
-import RegisterForm from './components/RegisterForm'; // Import the RegisterForm component
-import LoginForm from './components/LoginForm'; // Import the LoginForm component
-import Header from './components/Header';
+import React, {useEffect, useState} from 'react';
+import {BrowserRouter as Router, Routes, Route, useNavigate} from 'react-router-dom';
+import RegisterPage from './pages/registerPage';
+import LoginPage from './pages/loginPage';
 import CreateDiscussion from "./components/createDiscussion";
 
 function App() {
     return (
         <Router>
-            <Header />
             <Routes>
-                <Route path="/" element={<CreateDiscussion />} />
-                <Route path="/register" element={<RegisterForm />} />
-                <Route path="/login" element={<LoginForm />} />
+                <Route path="/" element={null}/>
+                <Route path="/register" element={<RegisterPage />} />
+                <Route path="/login" element={<LoginPage />} />
             </Routes>
         </Router>
     );
