@@ -22,24 +22,10 @@ app.use(express.static(path.join(__dirname, "..", 'public'))); // Serve static f
 
 // Static files (CSS, JS, etc.)
 const indexFile = fs.readFileSync(path.join(__dirname, "..", 'index.html'));
-// const registerFile = fs.readFileSync(path.join(__dirname, "..", 'public', 'register.html'));
-// const loginFile = fs.readFileSync(path.join(__dirname, "..", 'public', 'login.html'));
-
-// In-memory valid tokens (this should be stored securely in a real-world app)
-const validAuthTokens = [];
-
-// Routes for serving HTML pages
-// app.get('/register', (req, res) => {
-//     res.send(registerFile);
-// });
-//
-// app.get('/login', (req, res) => {
-//     res.send(loginFile);
-// });
 
 //Protected Route (Requires Valid Token)
 app.get('/', (req, res) => {
-    const credentials = getCredentials(req.cookies.token);
+    const credentials = au.getCredentials(req.cookies.token);
     if (!credentials) {
         return res.redirect('/login');
     }
@@ -72,8 +58,8 @@ app.post('/api/register', async (req, res) => {
 app.post('/api/login', async (req, res) => {
     try {
         const { login, password } = req.body;
-
         const user = await db.getUserByLogin(login); // Get user by login
+
         if (!user) {
             return res.status(401).send('Invalid username');
         }
@@ -86,7 +72,7 @@ app.post('/api/login', async (req, res) => {
         }
 
         // Generate auth token (for simplicity, using a random value here)
-        const token = au.generateAuthToken(user.id, login);
+        const token = au.generateAuthToken(user._id, login);
 
         // Set token in cookie
         res.status(200).json({ token });  // Sending token in response body
@@ -95,12 +81,6 @@ app.post('/api/login', async (req, res) => {
         res.status(500).send('Server Error: ' + err.message);
     }
 });
-
-function getCredentials(token) {
-    if (!token || !validAuthTokens.includes(token)) return null;
-    const [userId, login] = token.split('.');
-    return { userId, login };
-}
 
 app.get('api/discussions', async (req, res) => {
     try {
@@ -122,41 +102,41 @@ app.post('/api/addDiss', au.authToken,async (req, res) => {
     try {
         // Add the new message/discussion, including the user's ID as the author
         const newDiscussion = await db.addDiss({ content, title }, userId);
-        res.status(200).json({ message: 'Discussion created successfully!' });
+        res.status(200).json({ message: 'CreateDiscussion created successfully!' });
     } catch (error) {
         console.error("Error creating discussion:", error);
         res.status(500).json({ error: 'Failed to create discussion' });
     }
 });
 
-app.post('/api/addMessage', async (req, res) => {
-    try {
-        const { content, author } = req.body;
+// app.post('/api/addMessage', async (req, res) => {
+//     try {
+//         const { content, author } = req.body;
+//
+//         if (!content || !author) {
+//             return res.status(400).send('Content or author is missing');
+//         }
+//
+//         // Call addMessage to insert the message into the database
+//         await db.addMessage({ content, author });
+//
+//         res.status(201).send('Message added successfully');
+//     } catch (err) {
+//         console.error(err);
+//         res.status(500).send('Server Error: ' + err.message);
+//     }
+// });
 
-        if (!content || !author) {
-            return res.status(400).send('Content or author is missing');
-        }
-
-        // Call addMessage to insert the message into the database
-        await db.addMessage({ content, author });
-
-        res.status(201).send('Message added successfully');
-    } catch (err) {
-        console.error(err);
-        res.status(500).send('Server Error: ' + err.message);
-    }
-});
-
-// Route to get all messages
-app.get('/api/messages', async (req, res) => {
-    try {
-        const messages = await db.getMessages(); // Using the getMessages function
-        res.status(200).json(messages);
-    } catch (error) {
-        console.error('Error fetching messages:', error);
-        res.status(500).json({ message: 'Failed to fetch messages' });
-    }
-});
+// // Route to get all messages
+// app.get('/api/messages', async (req, res) => {
+//     try {
+//         const messages = await db.getMessages(); // Using the getMessages function
+//         res.status(200).json(messages);
+//     } catch (error) {
+//         console.error('Error fetching messages:', error);
+//         res.status(500).json({ message: 'Failed to fetch messages' });
+//     }
+// });
 
 
 // Start the server

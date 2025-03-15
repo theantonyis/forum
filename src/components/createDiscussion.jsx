@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import "../styles/discussion.css"
 
-const Discussion = () => {
+const CreateDiscussion = () => {
     // Стан для заголовка та контенту форми
     const [title, setTitle] = useState('');
     const [content, setContent] = useState('');
@@ -14,6 +14,7 @@ const Discussion = () => {
         e.preventDefault();
 
         const token = localStorage.getItem('authToken');
+        console.log('Token:', token);
 
         if (!token) {
             alert('You must be logged in to create a discussion');
@@ -30,7 +31,7 @@ const Discussion = () => {
                     'Content-Type': 'application/json',
                     'Authorization': `Bearer ${token}`,
                 },
-                body: JSON.stringify({ content: 'New discussion', title: 'Discussion Title' }),
+                body: JSON.stringify({ content: 'New discussion', title: 'CreateDiscussion Title' }),
             });
 
             if (response.ok) {
@@ -86,4 +87,4 @@ const Discussion = () => {
     );
 };
 
-export default Discussion;
+export default CreateDiscussion;

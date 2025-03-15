@@ -19,7 +19,10 @@ const LoginForm = () => {
             });
 
             if (response.ok) {
-                window.location.href = '/'; // Redirect after successful login
+                const data = await response.json();
+
+                localStorage.setItem('authToken', data.token);
+                navigate('/');
             } else {
                 const error = await response.text();
                 setErrorMessage(error);
@@ -38,7 +41,9 @@ const LoginForm = () => {
             <form className="register-form" onSubmit={handleSubmit} id="login-form">
                 <div className="register-form__container">
                     <h1 className="register-form__title">Login page</h1>
-                    {errorMessage && <p>{errorMessage}</p>}
+
+                    {/* Display error message if there is one */}
+                    {errorMessage && <p className="error-message">{errorMessage}</p>}
 
                     <label htmlFor="login" className="register-form__label">Login</label>
                     <input
@@ -49,6 +54,7 @@ const LoginForm = () => {
                         value={login}
                         onChange={(e) => setLogin(e.target.value)}
                         placeholder="Username"
+                        required
                     />
 
                     <label htmlFor="password" className="register-form__label">Password</label>
@@ -60,6 +66,7 @@ const LoginForm = () => {
                         value={password}
                         onChange={(e) => setPassword(e.target.value)}
                         placeholder="Password"
+                        required
                     />
 
                     <button type="submit" className="register-form__button">Submit</button>
