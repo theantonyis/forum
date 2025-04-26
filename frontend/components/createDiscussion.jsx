@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import "../styles/discussion.css"
+import "@/styles/discussion.css"
 
 const CreateDiscussion = () => {
     // Стан для заголовка та контенту форми

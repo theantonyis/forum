@@ -1,5 +1,5 @@
-import '../styles/style.css';
-import '../styles/discussion.css';
+import '@/styles/style.css';
+import '@/styles/discussion.css';
 import { useRouter } from 'next/router';
 
 const Header = () => {

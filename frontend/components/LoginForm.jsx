@@ -1,31 +1,30 @@
-import '../styles/style.css';
-import '../styles/discussion.css';
-import React, { useState } from 'react';
+import '@/styles/style.css';
+import '@/styles/discussion.css';
+import { useState } from 'react';
+import { useRouter } from 'next/router';
+import Link from 'next/link';
 
-const RegisterForm = () => {
+const LoginForm = () => {
     const [login, setLogin] = useState('');
     const [password, setPassword] = useState('');
-    const [passwordRepeat, setPasswordRepeat] = useState('');
     const [errorMessage, setErrorMessage] = useState('');
+    const router = useRouter();
 
     const handleSubmit = async (e) => {
         e.preventDefault();
 
-        // Check if passwords match
-        if (password !== passwordRepeat) {
-            setErrorMessage('Passwords do not match!');
-            return;
-        }
-
         try {
-            const response = await fetch('/api/register', {
+            const response = await fetch('/api/login', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ login, password }),
+                credentials: 'include',
             });
 
             if (response.ok) {
-                window.location.href = '/login'; // Redirect to login page if registration is successful
+                const data = await response.json();
+                localStorage.setItem('authToken', data.token);
+                await router.push('/');
             } else {
                 const error = await response.text();
                 setErrorMessage(error);
@@ -38,13 +37,14 @@ const RegisterForm = () => {
     return (
         <main>
             <header className="header">
-                <h1>RoboChat</h1>
-                <a className="link" href="/login">Login</a>
+                <h1>Forum</h1>
+                <Link className="link" href="/register">Register</Link>
             </header>
-            <form className="register-form" onSubmit={handleSubmit} id="register-form">
+            <form className="register-form" onSubmit={handleSubmit} id="login-form">
                 <div className="register-form__container">
-                    <h1 className="register-form__title">Register page</h1>
-                    {errorMessage && <p>{errorMessage}</p>}
+                    <h1 className="register-form__title">Login page</h1>
+
+                    {errorMessage && <p className="error-message">{errorMessage}</p>}
 
                     <label htmlFor="login" className="register-form__label">Login</label>
                     <input
@@ -54,7 +54,8 @@ const RegisterForm = () => {
                         className="register-form__input"
                         value={login}
                         onChange={(e) => setLogin(e.target.value)}
-                        placeholder="Login"
+                        placeholder="Username"
+                        required
                     />
 
                     <label htmlFor="password" className="register-form__label">Password</label>
@@ -66,17 +67,7 @@ const RegisterForm = () => {
                         value={password}
                         onChange={(e) => setPassword(e.target.value)}
                         placeholder="Password"
-                    />
-
-                    <label htmlFor="passwordRepeat" className="register-form__label">Repeat Password</label>
-                    <input
-                        type="password"
-                        id="passwordRepeat"
-                        name="passwordRepeat"
-                        className="register-form__input"
-                        value={passwordRepeat}
-                        onChange={(e) => setPasswordRepeat(e.target.value)}
-                        placeholder="Repeat Password"
+                        required
                     />
 
                     <button type="submit" className="register-form__button">Submit</button>
@@ -86,4 +77,4 @@ const RegisterForm = () => {
     );
 };
 
-export default RegisterForm;
+export default LoginForm;

@@ -1,5 +1,5 @@
-import '../styles/style.css';
-import '../styles/discussion.css';
+import '@/styles/style.css';
+import '@/styles/discussion.css';
 import { useEffect } from 'react';
 import { useRouter } from 'next/router';
 

@@ -1,30 +1,31 @@
-import '../styles/style.css';
-import '../styles/discussion.css';
-import { useState } from 'react';
-import { useRouter } from 'next/router';
-import Link from 'next/link';
+import '@/styles/style.css';
+import '@/styles/discussion.css';
+import React, { useState } from 'react';
 
-const LoginForm = () => {
+const RegisterForm = () => {
     const [login, setLogin] = useState('');
     const [password, setPassword] = useState('');
+    const [passwordRepeat, setPasswordRepeat] = useState('');
     const [errorMessage, setErrorMessage] = useState('');
-    const router = useRouter();
 
     const handleSubmit = async (e) => {
         e.preventDefault();
 
+        // Check if passwords match
+        if (password !== passwordRepeat) {
+            setErrorMessage('Passwords do not match!');
+            return;
+        }
+
         try {
-            const response = await fetch('/api/login', {
+            const response = await fetch('/api/register', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ login, password }),
-                credentials: 'include',
             });
 
             if (response.ok) {
-                const data = await response.json();
-                localStorage.setItem('authToken', data.token);
-                await router.push('/');
+                window.location.href = '/login'; // Redirect to login page if registration is successful
             } else {
                 const error = await response.text();
                 setErrorMessage(error);
@@ -37,14 +38,13 @@ const LoginForm = () => {
     return (
         <main>
             <header className="header">
-                <h1>Forum</h1>
-                <Link className="link" href="/register">Register</Link>
+                <h1>RoboChat</h1>
+                <a className="link" href="/login">Login</a>
             </header>
-            <form className="register-form" onSubmit={handleSubmit} id="login-form">
+            <form className="register-form" onSubmit={handleSubmit} id="register-form">
                 <div className="register-form__container">
-                    <h1 className="register-form__title">Login page</h1>
-
-                    {errorMessage && <p className="error-message">{errorMessage}</p>}
+                    <h1 className="register-form__title">Register page</h1>
+                    {errorMessage && <p>{errorMessage}</p>}
 
                     <label htmlFor="login" className="register-form__label">Login</label>
                     <input
@@ -54,8 +54,7 @@ const LoginForm = () => {
                         className="register-form__input"
                         value={login}
                         onChange={(e) => setLogin(e.target.value)}
-                        placeholder="Username"
-                        required
+                        placeholder="Login"
                     />
 
                     <label htmlFor="password" className="register-form__label">Password</label>
@@ -67,7 +66,17 @@ const LoginForm = () => {
                         value={password}
                         onChange={(e) => setPassword(e.target.value)}
                         placeholder="Password"
-                        required
+                    />
+
+                    <label htmlFor="passwordRepeat" className="register-form__label">Repeat Password</label>
+                    <input
+                        type="password"
+                        id="passwordRepeat"
+                        name="passwordRepeat"
+                        className="register-form__input"
+                        value={passwordRepeat}
+                        onChange={(e) => setPasswordRepeat(e.target.value)}
+                        placeholder="Repeat Password"
                     />
 
                     <button type="submit" className="register-form__button">Submit</button>
@@ -77,4 +86,4 @@ const LoginForm = () => {
     );
 };
 
-export default LoginForm;
+export default RegisterForm;
