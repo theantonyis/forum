@@ -1,9 +1,11 @@
 import '@/styles/style.css';
 import '@/styles/discussion.css';
 import React, { useState } from 'react';
+import axios from 'axios';
 
 const RegisterForm = () => {
-    const [login, setLogin] = useState('');
+    const [username, setUsername] = useState('');
+    const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [passwordRepeat, setPasswordRepeat] = useState('');
     const [errorMessage, setErrorMessage] = useState('');
@@ -11,27 +13,33 @@ const RegisterForm = () => {
     const handleSubmit = async (e) => {
         e.preventDefault();
 
-        // Check if passwords match
         if (password !== passwordRepeat) {
             setErrorMessage('Passwords do not match!');
             return;
         }
 
         try {
-            const response = await fetch('/api/register', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ login, password }),
-            });
+            const response = await axios.post(
+                'http://localhost:5000/api/auth/register',
+                {
+                    username,
+                    email,
+                    password
+                },
+                {
+                    withCredentials: true
+                }
+            );
 
-            if (response.ok) {
-                window.location.href = '/login'; // Redirect to login page if registration is successful
-            } else {
-                const error = await response.text();
-                setErrorMessage(error);
+            if (response.status === 201) {
+                window.location.href = '/login';
             }
         } catch (error) {
-            setErrorMessage('Error: ' + error.message);
+            if (error.response?.data?.message) {
+                setErrorMessage(error.response.data.message);
+            } else {
+                setErrorMessage('Error: ' + error.message);
+            }
         }
     };
 
@@ -46,15 +54,26 @@ const RegisterForm = () => {
                     <h1 className="register-form__title">Register page</h1>
                     {errorMessage && <p>{errorMessage}</p>}
 
-                    <label htmlFor="login" className="register-form__label">Login</label>
+                    <label htmlFor="username" className="register-form__label">Username</label>
                     <input
                         type="text"
-                        id="login"
-                        name="login"
+                        id="username"
+                        name="username"
                         className="register-form__input"
-                        value={login}
-                        onChange={(e) => setLogin(e.target.value)}
-                        placeholder="Login"
+                        value={username}
+                        onChange={(e) => setUsername(e.target.value)}
+                        placeholder="Username"
+                    />
+
+                    <label htmlFor="email" className="register-form__label">Email</label>
+                    <input
+                        type="email"
+                        id="email"
+                        name="email"
+                        className="register-form__input"
+                        value={email}
+                        onChange={(e) => setEmail(e.target.value)}
+                        placeholder="Email"
                     />
 
                     <label htmlFor="password" className="register-form__label">Password</label>

@@ -3,6 +3,7 @@ import '@/styles/discussion.css';
 import { useState } from 'react';
 import { useRouter } from 'next/router';
 import Link from 'next/link';
+import axios from 'axios';
 
 const LoginForm = () => {
     const [login, setLogin] = useState('');
@@ -14,23 +15,22 @@ const LoginForm = () => {
         e.preventDefault();
 
         try {
-            const response = await fetch('/api/login', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ login, password }),
-                credentials: 'include',
+            const response = await axios.post('http://localhost:5000/api/auth/login', {
+                username: login,
+                password,
+            }, {
+                withCredentials: true
             });
 
-            if (response.ok) {
-                const data = await response.json();
-                localStorage.setItem('authToken', data.token);
-                await router.push('/');
-            } else {
-                const error = await response.text();
-                setErrorMessage(error);
-            }
+
+            localStorage.setItem('authToken', response.data.token);
+            await router.push('/');
         } catch (error) {
-            setErrorMessage('Error: ' + error.message);
+            if (error.response) {
+                setErrorMessage(error.response.data?.message || 'Login failed');
+            } else {
+                setErrorMessage('Error: ' + error.message);
+            }
         }
     };
 
