@@ -1,5 +1,6 @@
-import '@/styles/style.css';
-import '@/styles/discussion.css';
+import '@styles/style.css';
+import '@styles/discussion.css';
+import '@styles/globals.css'
 import { useEffect } from 'react';
 import { useRouter } from 'next/router';
 
@@ -8,7 +9,7 @@ function MyApp({ Component, pageProps }) {
 
     useEffect(() => {
         if (typeof window !== 'undefined') {
-            const token = document.cookie.split('; ').find(row => row.startsWith('token='));
+            const token = localStorage.getItem('authToken');
             const isLoginPage = router.pathname === '/login';
             const isRegisterPage = router.pathname === '/register';
 
@@ -17,7 +18,7 @@ function MyApp({ Component, pageProps }) {
                 router.push('/login');
             }
         }
-    }, [router]);
+    }, [router.pathname]);
 
     return <Component {...pageProps} />;
 }

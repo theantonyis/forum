@@ -23,7 +23,7 @@ router.post("/", authMiddleware, async (req, res) => {
 });
 
 // GET ALL DISCUSSIONS
-router.get("/", async (req, res) => {
+router.get("/", authMiddleware, async (req, res) => {
     try {
         const discussions = await Discussion.find().populate("author", "username").sort({ createdAt: -1 });
         res.json(discussions);

@@ -24,7 +24,7 @@ const LoginForm = () => {
 
 
             localStorage.setItem('authToken', response.data.token);
-            await router.push('/');
+            await router.push('/discussions');
         } catch (error) {
             if (error.response) {
                 setErrorMessage(error.response.data?.message || 'Login failed');
